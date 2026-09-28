@@ -1,35 +1,64 @@
 # TaskFlow Todo List
 
-A fast, responsive To-Do List application built with plain HTML, CSS, and JavaScript, with a small Node.js serverless API for endpoint validation and automated API testing.
+A polished, responsive To-Do List application built with plain HTML, CSS, and JavaScript, with a small Node.js serverless API and automated endpoint tests.
 
 This project was coded entirely through an AI-assisted development workflow for the HNG task.
 
-## Live frontend
+## Live application
 
-GitHub Pages (static frontend):
+**HNG submission / full app + API:**
+
+https://todo-hng-task-1.vercel.app/
+
+API health check:
+
+https://todo-hng-task-1.vercel.app/api/health
+
+Static GitHub Pages fallback:
 
 https://godtech-ctl-create.github.io/todo-hng-task-1/
 
-> GitHub Pages cannot run the Node.js API functions. For HNG submission, deploy this repository to Vercel so the same public URL serves both the UI and `/api/*` endpoints.
+> GitHub Pages serves the frontend only. Vercel is the primary submission deployment because it also executes the `/api/*` serverless functions.
 
-## Features
+## Core requirements
 
-- Add, edit, complete, and delete tasks
+- Create, edit, complete, and delete tasks
 - Add and edit notes for every task
-- Search across both task titles and notes
-- Due dates and priority levels
-- All / Active / Completed filters
-- Live task counters
-- Browser `localStorage` persistence for tasks and notes
-- Backward compatibility with older saved tasks that had no notes field
-- Light and dark themes
-- Responsive mobile and desktop layout
-- Accessible labels, focus states, and keyboard-friendly controls
-- Tested Node.js API endpoints
+- Public deployment
+- `AGENTS.md` with structured AI-agent rules
+- Automated validation and API endpoint tests
 
 ## Additional features
 
-Beyond the required todo and notes functionality, TaskFlow includes due dates, priorities, search, filtering, overdue detection, persistent browser storage, task counters, theme switching, and an API validation layer.
+TaskFlow goes beyond the required todo + notes functionality with:
+
+- **Categories** — General, Work, Personal, Study, and Errands
+- **Priority levels** — Low, Normal, and High
+- **Due dates with smart status badges** — overdue, due today, due tomorrow, days remaining, or a formatted future date
+- **Search** across task titles, notes, and categories
+- **Filters** for All, Active, and Completed tasks
+- **Sorting** by Manual order, Newest, Oldest, Due date, and Priority
+- **Drag-and-drop manual ordering** with persisted order
+- **Undo delete** using a toast action
+- **Completion dashboard** with total, active, completed counts, percentage, and progress bar
+- **Context-aware empty states** for filters and search
+- **Light and dark themes**
+- **Responsive mobile and desktop layout**
+- **Subtle UI animations** with reduced-motion support
+- **Browser `localStorage` persistence**
+- **Backward compatibility** with older saved tasks that did not have notes or categories
+- **Live API status indicator** on the Vercel deployment
+- **Accessible labels, focus states, and keyboard-friendly controls**
+
+### Drag ordering behavior
+
+Manual drag ordering is intentionally enabled only when:
+
+- Filter = **All**
+- Sort = **Manual order**
+- Search is empty
+
+This prevents a sorted or filtered view from accidentally changing the user's persisted manual order.
 
 ## API endpoints
 
@@ -67,7 +96,7 @@ The endpoint validates required title input, notes length, priority, due-date fo
 
 ## Automated validation
 
-The project includes dependency-free automated tests using Node.js' built-in test runner.
+The project uses Node.js' built-in test runner and has no test-framework dependency.
 
 Requirements:
 
@@ -81,19 +110,23 @@ npm test
 
 The suite validates:
 
-- Task creation and blank-title rejection
-- Notes creation/editing and notes search
-- Task filtering and older localStorage compatibility
-- Required notes UI elements and safe text rendering
-- Script loading order
+- Task title and notes normalization
+- Blank-title rejection
+- Category normalization and legacy fallback
+- Notes/category editing without losing task state
+- Search across notes and categories
+- Active/Completed filtering
+- Newest/Oldest/Due/Priority sorting without source mutation
+- Required UI contracts for notes, categories, drag controls, sorting, progress, toast undo, and API status
+- Safe text rendering
 - `GET /api/health` success behavior
 - API unsupported-method behavior
 - `POST /api/validate-task` success behavior
-- Missing title validation
+- Missing-title validation
 - Malformed JSON handling
-- Invalid field validation
+- Invalid-field validation
 
-GitHub Actions runs the same suite automatically on pushes to `main`, pull requests, and manual workflow runs through `.github/workflows/validate.yml`.
+GitHub Actions runs the same validation automatically on pushes to `main`, pull requests, and manual workflow runs through `.github/workflows/validate.yml`.
 
 `AGENTS.md` requires every future API endpoint to include automated success, validation, method, not-found/auth where applicable, and failure-path tests before the change is considered complete.
 
@@ -105,7 +138,7 @@ The frontend itself needs no build step. You can serve the static files with any
 python -m http.server 8000
 ```
 
-For the complete serverless API behavior, use a Vercel-compatible local/deployment environment.
+For complete Vercel/serverless API behavior, use a Vercel-compatible local or deployed environment.
 
 ## Project structure
 
@@ -132,31 +165,22 @@ For the complete serverless API behavior, use a Vercel-compatible local/deployme
 
 ## Deployment
 
-### Full HNG submission deployment
+### Vercel — primary HNG deployment
 
-Deploy this repository to Vercel. Vercel will serve the root static frontend and automatically expose the files under `api/` as serverless endpoints.
+The public deployment is:
 
-Repository:
+https://todo-hng-task-1.vercel.app/
 
-https://github.com/gODtECH-Ctl-Create/todo-hng-task-1
+Verify the tested endpoint at:
 
-Quick import:
+https://todo-hng-task-1.vercel.app/api/health
 
-https://vercel.com/new/clone?repository-url=https://github.com/gODtECH-Ctl-Create/todo-hng-task-1
+### GitHub Pages — static fallback
 
-After deployment, verify:
-
-```text
-https://YOUR-VERCEL-DOMAIN.vercel.app/
-https://YOUR-VERCEL-DOMAIN.vercel.app/api/health
-```
-
-### GitHub Pages fallback
-
-Pushes to `main` continue to trigger `.github/workflows/pages.yml` and deploy the static frontend to:
+Pushes to `main` continue to trigger `.github/workflows/pages.yml` and deploy the frontend to:
 
 https://godtech-ctl-create.github.io/todo-hng-task-1/
 
 GitHub Pages does not execute the Node.js files under `api/`.
 
-See [`AGENTS.md`](./AGENTS.md) for project constraints, structured AI-agent instructions, endpoint testing requirements, review steps, and the definition of done.
+See [`AGENTS.md`](./AGENTS.md) for project constraints, structured AI-agent instructions, UI regression rules, endpoint testing requirements, and the definition of done.
