@@ -9,6 +9,9 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const VALID_PRIORITIES = new Set(['low', 'normal', 'high']);
   const VALID_FILTERS = new Set(['all', 'active', 'completed']);
+  const VALID_CATEGORIES = new Set(['general', 'work', 'personal', 'study', 'errands']);
+  const VALID_SORTS = new Set(['manual', 'newest', 'oldest', 'due', 'priority']);
+  const PRIORITY_WEIGHT = { high: 0, normal: 1, low: 2 };
 
   function normaliseTitle(value) {
     return String(value ?? '').trim().replace(/\s+/g, ' ');
@@ -27,7 +30,19 @@
     return VALID_PRIORITIES.has(value) ? value : 'normal';
   }
 
-  function createTodo({ id, title, notes = '', dueDate = '', priority = 'normal', createdAt }) {
+  function normaliseCategory(value) {
+    return VALID_CATEGORIES.has(value) ? value : 'general';
+  }
+
+  function createTodo({
+    id,
+    title,
+    notes = '',
+    dueDate = '',
+    priority = 'normal',
+    category = 'general',
+    createdAt,
+  }) {
     const cleanTitle = normaliseTitle(title);
 
     if (!cleanTitle) {
@@ -40,6 +55,7 @@
       notes: normaliseNotes(notes),
       dueDate: dueDate || '',
       priority: normalisePriority(priority),
+      category: normaliseCategory(category),
       completed: false,
       createdAt,
     };
@@ -61,6 +77,9 @@
       priority: changes.priority === undefined
         ? normalisePriority(todo.priority)
         : normalisePriority(changes.priority),
+      category: changes.category === undefined
+        ? normaliseCategory(todo.category)
+        : normaliseCategory(changes.category),
     };
   }
 
@@ -74,18 +93,58 @@
         (safeFilter === 'active' && !todo.completed) ||
         (safeFilter === 'completed' && todo.completed);
 
-      const searchableText = `${todo.title || ''} ${todo.notes || ''}`.toLowerCase();
+      const searchableText = `${todo.title || ''} ${todo.notes || ''} ${todo.category || ''}`.toLowerCase();
       const matchesSearch = !cleanQuery || searchableText.includes(cleanQuery);
 
       return matchesFilter && matchesSearch;
     });
   }
 
+  function timestamp(value) {
+    const time = Date.parse(value || '');
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function sortTodos(todos, sort = 'manual') {
+    const safeSort = VALID_SORTS.has(sort) ? sort : 'manual';
+    const sorted = [...todos];
+
+    if (safeSort === 'newest') {
+      return sorted.sort((a, b) => timestamp(b.createdAt) - timestamp(a.createdAt));
+    }
+
+    if (safeSort === 'oldest') {
+      return sorted.sort((a, b) => timestamp(a.createdAt) - timestamp(b.createdAt));
+    }
+
+    if (safeSort === 'due') {
+      return sorted.sort((a, b) => {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return String(a.dueDate).localeCompare(String(b.dueDate));
+      });
+    }
+
+    if (safeSort === 'priority') {
+      return sorted.sort(
+        (a, b) =>
+          PRIORITY_WEIGHT[normalisePriority(a.priority)] -
+          PRIORITY_WEIGHT[normalisePriority(b.priority)]
+      );
+    }
+
+    return sorted;
+  }
+
   return {
     normaliseTitle,
     normaliseNotes,
+    normalisePriority,
+    normaliseCategory,
     createTodo,
     updateTodo,
     filterTodos,
+    sortTodos,
   };
 });
