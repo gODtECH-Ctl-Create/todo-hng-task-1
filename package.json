@@ -1,0 +1,13 @@
+{
+  "name": "taskflow-todo-hng-task-1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-built HNG todo list with notes and GitHub Pages deployment.",
+  "scripts": {
+    "test": "node --test",
+    "validate": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
