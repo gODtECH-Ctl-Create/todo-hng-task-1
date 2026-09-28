@@ -6,9 +6,23 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="description" content="A polished todo list with notes, categories, priorities, sorting, progress tracking, and tested API endpoints.">
   <title>TaskFlow — Todo List</title>
+  <link rel="stylesheet" href="./loader.css">
   <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="app-loading">
+  <div id="app-loader" class="app-loader" role="status" aria-live="polite" aria-label="Loading TaskFlow">
+    <div class="loader-content">
+      <div class="loader-mark" aria-hidden="true">TF</div>
+      <p class="loader-title">TaskFlow</p>
+      <p class="loader-copy">Preparing your tasks...</p>
+      <div class="loader-dots" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
   <main class="app-shell">
     <section class="todo-app" aria-labelledby="app-title">
       <header class="app-header">
@@ -201,5 +215,6 @@
 
   <script src="./task-model.js"></script>
   <script src="./app.js" defer></script>
+  <script src="./loader.js" defer></script>
 </body>
 </html>
