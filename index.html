@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <meta name="description" content="A simple, fast todo list that keeps your tasks in your browser.">
+  <meta name="description" content="A simple, fast todo list with notes that keeps your tasks in your browser.">
   <title>TaskFlow — Todo List</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -15,7 +15,7 @@
         <div>
           <p class="eyebrow">STAY FOCUSED</p>
           <h1 id="app-title">My Todo List</h1>
-          <p class="subtitle">Plan the work. Finish the work.</p>
+          <p class="subtitle">Plan the work. Add the details. Finish the work.</p>
         </div>
         <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch theme" title="Switch theme">☾</button>
       </header>
@@ -24,6 +24,10 @@
         <div class="field field-grow">
           <label for="todo-input">Task</label>
           <input id="todo-input" name="task" type="text" maxlength="120" placeholder="What needs to be done?" required>
+        </div>
+        <div class="field notes-field">
+          <label for="notes-input">Notes <span class="optional-label">Optional</span></label>
+          <textarea id="notes-input" name="notes" maxlength="500" rows="3" placeholder="Add extra details, links, reminders, or context"></textarea>
         </div>
         <div class="field compact-field">
           <label for="due-date">Due date</label>
@@ -53,9 +57,9 @@
           <button class="filter-button" type="button" data-filter="completed">Completed</button>
         </div>
         <label class="search-box" for="search-input">
-          <span class="sr-only">Search tasks</span>
+          <span class="sr-only">Search tasks and notes</span>
           <span aria-hidden="true">⌕</span>
-          <input id="search-input" type="search" placeholder="Search tasks">
+          <input id="search-input" type="search" placeholder="Search tasks or notes">
         </label>
       </div>
 
@@ -73,7 +77,7 @@
       </section>
 
       <footer class="app-footer">
-        <span>Your tasks are saved on this device.</span>
+        <span>Your tasks and notes are saved on this device.</span>
         <button id="clear-all" class="text-button danger-text" type="button">Clear all</button>
       </footer>
     </section>
@@ -88,6 +92,7 @@
       </label>
       <div class="task-content">
         <p class="task-title"></p>
+        <p class="task-notes"></p>
         <div class="task-meta"></div>
       </div>
       <div class="task-actions">
@@ -110,6 +115,10 @@
         <label for="edit-title">Task</label>
         <input id="edit-title" type="text" maxlength="120" required>
       </div>
+      <div class="field">
+        <label for="edit-notes">Notes <span class="optional-label">Optional</span></label>
+        <textarea id="edit-notes" maxlength="500" rows="4" placeholder="Add extra details, links, reminders, or context"></textarea>
+      </div>
       <div class="dialog-grid">
         <div class="field">
           <label for="edit-date">Due date</label>
@@ -131,6 +140,7 @@
     </form>
   </dialog>
 
+  <script src="./task-model.js"></script>
   <script src="./app.js" defer></script>
 </body>
 </html>
