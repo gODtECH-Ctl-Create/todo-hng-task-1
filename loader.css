@@ -1,0 +1,138 @@
+body.app-loading {
+  overflow: hidden;
+}
+
+.app-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f8fafc;
+  color: #0f172a;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 280ms ease, visibility 280ms ease;
+}
+
+.loader-content {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.loader-mark {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  box-shadow: 0 14px 30px rgba(79, 70, 229, 0.2);
+}
+
+.loader-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.loader-copy {
+  margin: -5px 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.loader-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.loader-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4f46e5;
+  animation: loader-bounce 900ms ease-in-out infinite;
+}
+
+.loader-dots span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.loader-dots span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+body.app-loading .app-shell {
+  opacity: 0;
+  visibility: hidden;
+}
+
+body.app-ready .app-shell {
+  animation: app-reveal 320ms ease both;
+}
+
+body.app-ready .app-loader {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@keyframes loader-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  30% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
+}
+
+@keyframes app-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-loader {
+    background: #020617;
+    color: #f8fafc;
+  }
+
+  .loader-copy {
+    color: #94a3b8;
+  }
+
+  .loader-dots span {
+    background: #818cf8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-loader,
+  body.app-ready .app-shell {
+    transition: none;
+    animation: none;
+  }
+
+  .loader-dots span {
+    animation: none;
+    opacity: 0.75;
+  }
+}
