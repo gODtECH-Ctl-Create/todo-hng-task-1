@@ -46,8 +46,5 @@ Then visit `http://localhost:8000`.
 
 Pushes to `main` trigger the GitHub Pages workflow in `.github/workflows/pages.yml`.
 
-For a repository using Pages for the first time, set **Settings → Pages → Build and deployment → Source** to **GitHub Actions** once. Future pushes to `main` will deploy automatically.
-
-## Agent workflow
 
 See [`AGENTS.md`](./AGENTS.md) for project constraints, coding rules, review steps, and the definition of done.
