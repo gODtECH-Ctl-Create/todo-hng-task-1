@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <meta name="description" content="A simple, fast todo list with notes that keeps your tasks in your browser.">
+  <meta name="description" content="A polished todo list with notes, categories, priorities, sorting, progress tracking, and tested API endpoints.">
   <title>TaskFlow — Todo List</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -12,12 +12,18 @@
   <main class="app-shell">
     <section class="todo-app" aria-labelledby="app-title">
       <header class="app-header">
-        <div>
-          <p class="eyebrow">STAY FOCUSED</p>
-          <h1 id="app-title">My Todo List</h1>
-          <p class="subtitle">Plan the work. Add the details. Finish the work.</p>
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">TF</div>
+          <div>
+            <p class="eyebrow">TASKFLOW</p>
+            <h1 id="app-title">My Todo List</h1>
+            <p class="subtitle">Organize the work. Keep the context. Finish with focus.</p>
+          </div>
         </div>
-        <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch theme" title="Switch theme">☾</button>
+        <div class="header-actions">
+          <span id="api-status" class="api-status checking"><span class="status-dot" aria-hidden="true"></span>Checking API</span>
+          <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch theme" title="Switch theme">☾</button>
+        </div>
       </header>
 
       <form id="todo-form" class="todo-form" autocomplete="off">
@@ -41,13 +47,35 @@
             <option value="low">Low</option>
           </select>
         </div>
-        <button class="primary-button" type="submit">Add task</button>
+        <div class="field compact-field">
+          <label for="category">Category</label>
+          <select id="category" name="category">
+            <option value="general">General</option>
+            <option value="work">Work</option>
+            <option value="personal">Personal</option>
+            <option value="study">Study</option>
+            <option value="errands">Errands</option>
+          </select>
+        </div>
+        <button class="primary-button add-button" type="submit"><span aria-hidden="true">＋</span> Add task</button>
       </form>
 
       <div class="dashboard" aria-label="Task summary">
-        <div class="stat-card"><strong id="total-count">0</strong><span>Total</span></div>
-        <div class="stat-card"><strong id="active-count">0</strong><span>Active</span></div>
-        <div class="stat-card"><strong id="completed-count">0</strong><span>Done</span></div>
+        <div class="stat-card"><span class="stat-icon" aria-hidden="true">☷</span><div><strong id="total-count">0</strong><span>Total tasks</span></div></div>
+        <div class="stat-card"><span class="stat-icon" aria-hidden="true">◷</span><div><strong id="active-count">0</strong><span>In progress</span></div></div>
+        <div class="stat-card"><span class="stat-icon" aria-hidden="true">✓</span><div><strong id="completed-count">0</strong><span>Completed</span></div></div>
+        <div class="progress-card">
+          <div class="progress-copy">
+            <div>
+              <span class="progress-kicker">PROGRESS</span>
+              <strong id="progress-label">No tasks yet</strong>
+            </div>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div id="progress-track" class="progress-track" role="progressbar" aria-label="Task completion progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span id="progress-bar" class="progress-bar"></span>
+          </div>
+        </div>
       </div>
 
       <div class="toolbar">
@@ -56,28 +84,43 @@
           <button class="filter-button" type="button" data-filter="active">Active</button>
           <button class="filter-button" type="button" data-filter="completed">Completed</button>
         </div>
-        <label class="search-box" for="search-input">
-          <span class="sr-only">Search tasks and notes</span>
-          <span aria-hidden="true">⌕</span>
-          <input id="search-input" type="search" placeholder="Search tasks or notes">
-        </label>
+        <div class="toolbar-actions">
+          <label class="search-box" for="search-input">
+            <span aria-hidden="true">⌕</span>
+            <span class="sr-only">Search tasks, notes, and categories</span>
+            <input id="search-input" type="search" placeholder="Search tasks, notes, categories">
+          </label>
+          <label class="sort-box" for="sort-select">
+            <span class="sr-only">Sort tasks</span>
+            <select id="sort-select" aria-label="Sort tasks">
+              <option value="manual">Manual order</option>
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="due">Due date</option>
+              <option value="priority">Priority</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <section class="task-section" aria-labelledby="tasks-heading">
         <div class="section-heading">
-          <h2 id="tasks-heading">Tasks</h2>
+          <div>
+            <h2 id="tasks-heading">Tasks</h2>
+            <p id="drag-hint" class="section-hint">Drag tasks to reorder while using Manual order.</p>
+          </div>
           <button id="clear-completed" class="text-button" type="button">Clear completed</button>
         </div>
         <ul id="todo-list" class="todo-list" aria-live="polite"></ul>
         <div id="empty-state" class="empty-state">
           <div class="empty-icon" aria-hidden="true">✓</div>
-          <h3>No tasks here</h3>
-          <p>Add a task above and start making progress.</p>
+          <h3 id="empty-title">No tasks here</h3>
+          <p id="empty-copy">Add a task above and start making progress.</p>
         </div>
       </section>
 
       <footer class="app-footer">
-        <span>Your tasks and notes are saved on this device.</span>
+        <span>Your tasks, notes, categories, and order are saved on this device.</span>
         <button id="clear-all" class="text-button danger-text" type="button">Clear all</button>
       </footer>
     </section>
@@ -85,6 +128,7 @@
 
   <template id="task-template">
     <li class="todo-item">
+      <button class="drag-handle" type="button" aria-label="Drag to reorder task" title="Drag to reorder">⋮⋮</button>
       <label class="check-wrap">
         <input class="task-checkbox" type="checkbox">
         <span class="custom-check" aria-hidden="true"></span>
@@ -119,7 +163,7 @@
         <label for="edit-notes">Notes <span class="optional-label">Optional</span></label>
         <textarea id="edit-notes" maxlength="500" rows="4" placeholder="Add extra details, links, reminders, or context"></textarea>
       </div>
-      <div class="dialog-grid">
+      <div class="dialog-grid three-columns">
         <div class="field">
           <label for="edit-date">Due date</label>
           <input id="edit-date" type="date">
@@ -132,6 +176,16 @@
             <option value="low">Low</option>
           </select>
         </div>
+        <div class="field">
+          <label for="edit-category">Category</label>
+          <select id="edit-category">
+            <option value="general">General</option>
+            <option value="work">Work</option>
+            <option value="personal">Personal</option>
+            <option value="study">Study</option>
+            <option value="errands">Errands</option>
+          </select>
+        </div>
       </div>
       <div class="dialog-actions">
         <button id="cancel-edit" class="secondary-button" type="button">Cancel</button>
@@ -139,6 +193,11 @@
       </div>
     </form>
   </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-hidden="true">
+    <span id="toast-message">Task updated.</span>
+    <button id="toast-action" class="toast-action" type="button" hidden>Undo</button>
+  </div>
 
   <script src="./task-model.js"></script>
   <script src="./app.js" defer></script>
