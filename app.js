@@ -3,6 +3,7 @@ const THEME_KEY = 'taskflow.theme';
 
 const form = document.querySelector('#todo-form');
 const todoInput = document.querySelector('#todo-input');
+const notesInput = document.querySelector('#notes-input');
 const dueDateInput = document.querySelector('#due-date');
 const priorityInput = document.querySelector('#priority');
 const list = document.querySelector('#todo-list');
@@ -20,6 +21,7 @@ const themeToggle = document.querySelector('#theme-toggle');
 const editDialog = document.querySelector('#edit-dialog');
 const editForm = document.querySelector('#edit-form');
 const editTitle = document.querySelector('#edit-title');
+const editNotes = document.querySelector('#edit-notes');
 const editDate = document.querySelector('#edit-date');
 const editPriority = document.querySelector('#edit-priority');
 const closeDialogButton = document.querySelector('#close-dialog');
@@ -32,7 +34,19 @@ let editingId = null;
 function loadTodos() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return Array.isArray(saved) ? saved : [];
+    if (!Array.isArray(saved)) return [];
+
+    return saved
+      .filter((todo) => todo && typeof todo === 'object' && TaskModel.normaliseTitle(todo.title))
+      .map((todo) => ({
+        ...todo,
+        title: TaskModel.normaliseTitle(todo.title),
+        notes: TaskModel.normaliseNotes(todo.notes),
+        dueDate: todo.dueDate || '',
+        priority: ['low', 'normal', 'high'].includes(todo.priority) ? todo.priority : 'normal',
+        completed: Boolean(todo.completed),
+        createdAt: todo.createdAt || new Date().toISOString(),
+      }));
   } catch {
     return [];
   }
@@ -45,10 +59,6 @@ function saveTodos() {
 function createId() {
   if (window.crypto?.randomUUID) return crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function normaliseTitle(value) {
-  return value.trim().replace(/\s+/g, ' ');
 }
 
 function formatDate(dateString) {
@@ -68,16 +78,9 @@ function isOverdue(todo) {
 }
 
 function visibleTodos() {
-  const query = searchInput.value.trim().toLowerCase();
-
-  return todos.filter((todo) => {
-    const matchesFilter =
-      currentFilter === 'all' ||
-      (currentFilter === 'active' && !todo.completed) ||
-      (currentFilter === 'completed' && todo.completed);
-
-    const matchesSearch = !query || todo.title.toLowerCase().includes(query);
-    return matchesFilter && matchesSearch;
+  return TaskModel.filterTodos(todos, {
+    filter: currentFilter,
+    query: searchInput.value,
   });
 }
 
@@ -90,6 +93,7 @@ function render() {
     const item = fragment.querySelector('.todo-item');
     const checkbox = fragment.querySelector('.task-checkbox');
     const title = fragment.querySelector('.task-title');
+    const notes = fragment.querySelector('.task-notes');
     const meta = fragment.querySelector('.task-meta');
     const editButton = fragment.querySelector('.edit-button');
     const deleteButton = fragment.querySelector('.delete-button');
@@ -99,6 +103,9 @@ function render() {
     checkbox.checked = todo.completed;
     checkbox.setAttribute('aria-label', todo.completed ? `Mark ${todo.title} active` : `Mark ${todo.title} complete`);
     title.textContent = todo.title;
+
+    notes.textContent = todo.notes || '';
+    notes.hidden = !todo.notes;
 
     const priority = document.createElement('span');
     priority.className = `meta-chip priority-chip ${todo.priority}`;
@@ -128,15 +135,17 @@ function render() {
   clearCompletedButton.disabled = completed === 0;
 }
 
-function addTodo(title, dueDate, priority) {
-  todos.unshift({
+function addTodo(title, notes, dueDate, priority) {
+  const todo = TaskModel.createTodo({
     id: createId(),
     title,
+    notes,
     dueDate,
     priority,
-    completed: false,
     createdAt: new Date().toISOString(),
   });
+
+  todos.unshift(todo);
   saveTodos();
   render();
 }
@@ -161,6 +170,7 @@ function openEditDialog(id) {
 
   editingId = id;
   editTitle.value = todo.title;
+  editNotes.value = todo.notes || '';
   editDate.value = todo.dueDate || '';
   editPriority.value = todo.priority || 'normal';
   editDialog.showModal();
@@ -186,10 +196,10 @@ function initialiseTheme() {
 
 form.addEventListener('submit', (event) => {
   event.preventDefault();
-  const title = normaliseTitle(todoInput.value);
+  const title = TaskModel.normaliseTitle(todoInput.value);
   if (!title) return;
 
-  addTodo(title, dueDateInput.value, priorityInput.value);
+  addTodo(title, notesInput.value, dueDateInput.value, priorityInput.value);
   form.reset();
   priorityInput.value = 'normal';
   todoInput.focus();
@@ -197,12 +207,17 @@ form.addEventListener('submit', (event) => {
 
 editForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const title = normaliseTitle(editTitle.value);
+  const title = TaskModel.normaliseTitle(editTitle.value);
   if (!title || !editingId) return;
 
   todos = todos.map((todo) =>
     todo.id === editingId
-      ? { ...todo, title, dueDate: editDate.value, priority: editPriority.value }
+      ? TaskModel.updateTodo(todo, {
+          title,
+          notes: editNotes.value,
+          dueDate: editDate.value,
+          priority: editPriority.value,
+        })
       : todo
   );
 
@@ -229,7 +244,7 @@ clearCompletedButton.addEventListener('click', () => {
 
 clearAllButton.addEventListener('click', () => {
   if (!todos.length) return;
-  if (!window.confirm('Delete all tasks? This cannot be undone.')) return;
+  if (!window.confirm('Delete all tasks and notes? This cannot be undone.')) return;
   todos = [];
   saveTodos();
   render();
