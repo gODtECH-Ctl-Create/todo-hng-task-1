@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="A simple, fast todo list that keeps your tasks in your browser.">
+  <title>TaskFlow — Todo List</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="todo-app" aria-labelledby="app-title">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">STAY FOCUSED</p>
+          <h1 id="app-title">My Todo List</h1>
+          <p class="subtitle">Plan the work. Finish the work.</p>
+        </div>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch theme" title="Switch theme">☾</button>
+      </header>
+
+      <form id="todo-form" class="todo-form" autocomplete="off">
+        <div class="field field-grow">
+          <label for="todo-input">Task</label>
+          <input id="todo-input" name="task" type="text" maxlength="120" placeholder="What needs to be done?" required>
+        </div>
+        <div class="field compact-field">
+          <label for="due-date">Due date</label>
+          <input id="due-date" name="dueDate" type="date">
+        </div>
+        <div class="field compact-field">
+          <label for="priority">Priority</label>
+          <select id="priority" name="priority">
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <button class="primary-button" type="submit">Add task</button>
+      </form>
+
+      <div class="dashboard" aria-label="Task summary">
+        <div class="stat-card"><strong id="total-count">0</strong><span>Total</span></div>
+        <div class="stat-card"><strong id="active-count">0</strong><span>Active</span></div>
+        <div class="stat-card"><strong id="completed-count">0</strong><span>Done</span></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="filters" role="group" aria-label="Filter tasks">
+          <button class="filter-button active" type="button" data-filter="all">All</button>
+          <button class="filter-button" type="button" data-filter="active">Active</button>
+          <button class="filter-button" type="button" data-filter="completed">Completed</button>
+        </div>
+        <label class="search-box" for="search-input">
+          <span class="sr-only">Search tasks</span>
+          <span aria-hidden="true">⌕</span>
+          <input id="search-input" type="search" placeholder="Search tasks">
+        </label>
+      </div>
+
+      <section class="task-section" aria-labelledby="tasks-heading">
+        <div class="section-heading">
+          <h2 id="tasks-heading">Tasks</h2>
+          <button id="clear-completed" class="text-button" type="button">Clear completed</button>
+        </div>
+        <ul id="todo-list" class="todo-list" aria-live="polite"></ul>
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon" aria-hidden="true">✓</div>
+          <h3>No tasks here</h3>
+          <p>Add a task above and start making progress.</p>
+        </div>
+      </section>
+
+      <footer class="app-footer">
+        <span>Your tasks are saved on this device.</span>
+        <button id="clear-all" class="text-button danger-text" type="button">Clear all</button>
+      </footer>
+    </section>
+  </main>
+
+  <template id="task-template">
+    <li class="todo-item">
+      <label class="check-wrap">
+        <input class="task-checkbox" type="checkbox">
+        <span class="custom-check" aria-hidden="true"></span>
+        <span class="sr-only">Mark task complete</span>
+      </label>
+      <div class="task-content">
+        <p class="task-title"></p>
+        <div class="task-meta"></div>
+      </div>
+      <div class="task-actions">
+        <button class="task-action edit-button" type="button" aria-label="Edit task" title="Edit task">✎</button>
+        <button class="task-action delete-button" type="button" aria-label="Delete task" title="Delete task">×</button>
+      </div>
+    </li>
+  </template>
+
+  <dialog id="edit-dialog" class="edit-dialog">
+    <form id="edit-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">UPDATE TASK</p>
+          <h2>Edit task</h2>
+        </div>
+        <button id="close-dialog" class="icon-button" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="field">
+        <label for="edit-title">Task</label>
+        <input id="edit-title" type="text" maxlength="120" required>
+      </div>
+      <div class="dialog-grid">
+        <div class="field">
+          <label for="edit-date">Due date</label>
+          <input id="edit-date" type="date">
+        </div>
+        <div class="field">
+          <label for="edit-priority">Priority</label>
+          <select id="edit-priority">
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancel-edit" class="secondary-button" type="button">Cancel</button>
+        <button class="primary-button" type="submit">Save changes</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
