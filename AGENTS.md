@@ -5,6 +5,7 @@ Build and maintain a polished HNG To-Do List application that is easy to use, ea
 
 ## Product requirements
 The application must let a user:
+- See a brief loading splash before the main todo interface is revealed on first page load.
 - Add a task.
 - Add optional notes to a task.
 - View and edit task notes.
@@ -35,13 +36,15 @@ The notes feature is mandatory. Do not remove or silently break it while changin
 - Never commit secrets, credentials, tokens, or private data.
 
 ## Source structure
-- `index.html` — semantic page structure and UI controls, including notes, category, sort, progress, drag handle, toast, and edit controls.
+- `index.html` — semantic page structure and UI controls, including loading splash, notes, category, sort, progress, drag handle, toast, and edit controls.
+- `loader.css` — first-load splash presentation and reduced-motion behavior.
+- `loader.js` — loading-splash timing and transition into the main application.
 - `styles.css` — responsive visual design, themes, task cards, badges, drag states, progress, and toast states.
 - `task-model.js` — reusable task normalization, creation, editing, filtering, categories, and sorting logic.
 - `app.js` — browser state, localStorage persistence, event handling, rendering, drag ordering, toast undo, due-state display, progress, API status, and theme behavior.
 - `api/health.js` — health/status endpoint.
 - `api/validate-task.js` — server-side task validation endpoint.
-- `tests/` — automated Node.js tests, including model, static UI contract, and endpoint tests.
+- `tests/` — automated Node.js tests, including model, static UI contract, loading-state, and endpoint tests.
 - `package.json` — dependency-free test commands.
 - `.github/workflows/validate.yml` — automated validation on pushes and pull requests.
 - `.github/workflows/pages.yml` — GitHub Pages static deployment workflow.
@@ -65,6 +68,8 @@ For every change, follow this order:
 
 ## UI rules
 - Keep the interface clean and task-focused; new controls must earn their space.
+- The initial loading splash must remain lightweight, non-interactive, and short-lived; it must not block the app indefinitely if API health checks fail.
+- The loader must honor `prefers-reduced-motion` and the main app must become visible after the page load transition completes.
 - Notes must remain clearly associated with their task without overwhelming the title.
 - Category, priority, and due-state badges must remain readable in light and dark themes.
 - Progress must be derived from actual completed/total task counts.
@@ -86,6 +91,7 @@ For every change, follow this order:
 - New tasks and older tasks with unknown categories must normalize safely to `general`.
 - Sorting must operate on copies and must not mutate the persisted manual task order.
 - Due-date labels must be based on local calendar days, not UTC midnight assumptions.
+- Loading-state behavior belongs in `loader.js`; task behavior belongs in `app.js`.
 - Do not introduce framework code unless the project is deliberately migrated and deployment/testing workflows are updated with it.
 
 ## API rules
@@ -113,7 +119,8 @@ Automated frontend/model tests must cover, at minimum:
 - Combining search with Active/Completed filters.
 - Loading/filtering older saved tasks that do not have `notes` or `category`.
 - Newest, oldest, due-date, and priority sorting without mutating source order.
-- Required static UI contracts for notes, categories, sort controls, progress, drag handle, toast/undo, API status, and script loading order.
+- Required static UI contracts for the first-load splash, notes, categories, sort controls, progress, drag handle, toast/undo, API status, and script loading order.
+- Loading controller behavior that removes `app-loading`, applies `app-ready`, and does not depend on a successful API response.
 - Safe user-content rendering with `textContent`.
 
 Automated API tests must cover, at minimum:
@@ -136,6 +143,9 @@ For every future endpoint, add automated tests for:
 Do not merge a new API endpoint with only manual testing.
 
 For browser-facing changes, also manually validate:
+- Open a fresh page and confirm the loading splash appears briefly before the todo interface fades in.
+- Verify the loader does not remain stuck if `/api/health` is unavailable.
+- Verify reduced-motion preference does not require loader/app animations.
 - Create a task with title, notes, category, priority, and due date.
 - Refresh and confirm all task data still exists.
 - Edit notes/category and confirm the updated values persist after refresh.
@@ -158,6 +168,7 @@ For browser-facing changes, also manually validate:
 A change is complete only when:
 - The requested feature works without a console-breaking error.
 - `npm test` passes, including API endpoint tests.
+- The loading splash appears briefly and reliably hands control to the main application.
 - Add, notes, categories, complete, edit, delete, undo, filter, search, sort, and drag reorder still work.
 - Progress and due-state labels reflect task state correctly.
 - Notes, categories, and manual order persist after refresh.
