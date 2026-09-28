@@ -12,12 +12,31 @@ test('create form includes an optional notes field', () => {
   assert.match(html, /name="notes"/);
 });
 
+test('create and edit forms expose task categories', () => {
+  assert.match(html, /id="category"/);
+  assert.match(html, /name="category"/);
+  assert.match(html, /id="edit-category"/);
+});
+
 test('edit dialog includes an editable notes field', () => {
   assert.match(html, /id="edit-notes"/);
 });
 
-test('task template includes a notes display element', () => {
+test('task template includes notes and drag controls', () => {
   assert.match(html, /class="task-notes"/);
+  assert.match(html, /class="drag-handle"/);
+});
+
+test('dashboard includes progress tracking and sorting controls', () => {
+  assert.match(html, /id="progress-track"/);
+  assert.match(html, /id="progress-bar"/);
+  assert.match(html, /id="sort-select"/);
+});
+
+test('interface includes undo toast and API status feedback', () => {
+  assert.match(html, /id="toast"/);
+  assert.match(html, /id="toast-action"/);
+  assert.match(html, /id="api-status"/);
 });
 
 test('task model loads before the browser application', () => {
@@ -34,6 +53,14 @@ test('rendered notes use textContent rather than HTML injection', () => {
   assert.doesNotMatch(app, /notes\.innerHTML\s*=/);
 });
 
-test('browser app searches through the shared task model', () => {
+test('browser app searches and sorts through the shared task model', () => {
   assert.match(app, /TaskModel\.filterTodos/);
+  assert.match(app, /TaskModel\.sortTodos/);
+});
+
+test('browser app implements drag reorder and undoable deletion', () => {
+  assert.match(app, /dragstart/);
+  assert.match(app, /reorderTodo/);
+  assert.match(app, /Task deleted\./);
+  assert.match(app, /Task restored\./);
 });
