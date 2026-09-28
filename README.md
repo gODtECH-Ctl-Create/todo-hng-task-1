@@ -1,12 +1,16 @@
 # TaskFlow Todo List
 
-A fast, responsive To-Do List application built with plain HTML, CSS, and JavaScript and designed to run on GitHub Pages.
+A fast, responsive To-Do List application built with plain HTML, CSS, and JavaScript, with a small Node.js serverless API for endpoint validation and automated API testing.
 
 This project was coded entirely through an AI-assisted development workflow for the HNG task.
 
-## Live site
+## Live frontend
+
+GitHub Pages (static frontend):
 
 https://godtech-ctl-create.github.io/todo-hng-task-1/
+
+> GitHub Pages cannot run the Node.js API functions. For HNG submission, deploy this repository to Vercel so the same public URL serves both the UI and `/api/*` endpoints.
 
 ## Features
 
@@ -21,10 +25,45 @@ https://godtech-ctl-create.github.io/todo-hng-task-1/
 - Light and dark themes
 - Responsive mobile and desktop layout
 - Accessible labels, focus states, and keyboard-friendly controls
+- Tested Node.js API endpoints
 
 ## Additional features
 
-Beyond the required todo and notes functionality, TaskFlow includes due dates, priorities, search, filtering, overdue detection, persistent browser storage, task counters, and theme switching.
+Beyond the required todo and notes functionality, TaskFlow includes due dates, priorities, search, filtering, overdue detection, persistent browser storage, task counters, theme switching, and an API validation layer.
+
+## API endpoints
+
+### `GET /api/health`
+
+Returns the API health state.
+
+Example success response:
+
+```json
+{
+  "status": "ok",
+  "service": "taskflow-api"
+}
+```
+
+Unsupported methods return HTTP `405` with an `Allow: GET` header.
+
+### `POST /api/validate-task`
+
+Validates and normalizes task input before it is accepted by an API consumer.
+
+Example request:
+
+```json
+{
+  "title": "Finish HNG task",
+  "notes": "Check endpoint tests",
+  "priority": "high",
+  "dueDate": "2026-09-30"
+}
+```
+
+The endpoint validates required title input, notes length, priority, due-date format, malformed JSON, and unsupported HTTP methods.
 
 ## Automated validation
 
@@ -40,23 +79,33 @@ Run:
 npm test
 ```
 
-The tests validate task creation, blank-title rejection, notes creation/editing, notes search, task filtering, compatibility with older tasks, required notes UI elements, safe text rendering, and script loading order.
+The suite validates:
 
-GitHub Actions also runs the same test suite automatically on pushes to `main`, pull requests, and manual workflow runs through `.github/workflows/validate.yml`.
+- Task creation and blank-title rejection
+- Notes creation/editing and notes search
+- Task filtering and older localStorage compatibility
+- Required notes UI elements and safe text rendering
+- Script loading order
+- `GET /api/health` success behavior
+- API unsupported-method behavior
+- `POST /api/validate-task` success behavior
+- Missing title validation
+- Malformed JSON handling
+- Invalid field validation
 
-The project has no backend or API at present, so API endpoint tests are not applicable. `AGENTS.md` requires endpoint tests for success, validation, authentication/authorization where applicable, not-found, and failure cases if an API is introduced later.
+GitHub Actions runs the same suite automatically on pushes to `main`, pull requests, and manual workflow runs through `.github/workflows/validate.yml`.
+
+`AGENTS.md` requires every future API endpoint to include automated success, validation, method, not-found/auth where applicable, and failure-path tests before the change is considered complete.
 
 ## Run locally
 
-The production application needs no installation or build step. Open `index.html` in a browser or serve the repository with any static HTTP server.
-
-For example:
+The frontend itself needs no build step. You can serve the static files with any HTTP server:
 
 ```bash
 python -m http.server 8000
 ```
 
-Then visit `http://localhost:8000`.
+For the complete serverless API behavior, use a Vercel-compatible local/deployment environment.
 
 ## Project structure
 
@@ -65,7 +114,11 @@ Then visit `http://localhost:8000`.
 ├── .github/workflows/
 │   ├── pages.yml
 │   └── validate.yml
+├── api/
+│   ├── health.js
+│   └── validate-task.js
 ├── tests/
+│   ├── api-endpoints.test.js
 │   ├── static-app.test.js
 │   └── task-model.test.js
 ├── AGENTS.md
@@ -79,10 +132,31 @@ Then visit `http://localhost:8000`.
 
 ## Deployment
 
-Pushes to `main` trigger the GitHub Pages deployment workflow in `.github/workflows/pages.yml`.
+### Full HNG submission deployment
 
-Live URL:
+Deploy this repository to Vercel. Vercel will serve the root static frontend and automatically expose the files under `api/` as serverless endpoints.
+
+Repository:
+
+https://github.com/gODtECH-Ctl-Create/todo-hng-task-1
+
+Quick import:
+
+https://vercel.com/new/clone?repository-url=https://github.com/gODtECH-Ctl-Create/todo-hng-task-1
+
+After deployment, verify:
+
+```text
+https://YOUR-VERCEL-DOMAIN.vercel.app/
+https://YOUR-VERCEL-DOMAIN.vercel.app/api/health
+```
+
+### GitHub Pages fallback
+
+Pushes to `main` continue to trigger `.github/workflows/pages.yml` and deploy the static frontend to:
 
 https://godtech-ctl-create.github.io/todo-hng-task-1/
 
-See [`AGENTS.md`](./AGENTS.md) for project constraints, structured AI-agent instructions, testing rules, API validation requirements, review steps, and the definition of done.
+GitHub Pages does not execute the Node.js files under `api/`.
+
+See [`AGENTS.md`](./AGENTS.md) for project constraints, structured AI-agent instructions, endpoint testing requirements, review steps, and the definition of done.
